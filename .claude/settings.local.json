@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(/usr/libexec/java_home -V 2>&1:*)",
+      "Bash(.claude/cli.sh:*)",
+      "Bash(.claude/scripts/*:*)",
+      "Bash(.claude/skills/*:*)",
+      "Bash(bash .claude/*:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(del:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)"
+    ]
+  }
+}

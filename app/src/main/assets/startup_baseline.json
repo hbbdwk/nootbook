@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "baseline": {
+    "total_startup_ms": 300,
+    "tasks": {
+      "DatabaseInitTask": {
+        "p50_ms": 80,
+        "p90_ms": 150
+      }
+    }
+  },
+  "thresholds": {
+    "total_regression_warn_pct": 15,
+    "total_regression_error_pct": 30,
+    "task_regression_abs_ms": 50
+  }
+}
+
