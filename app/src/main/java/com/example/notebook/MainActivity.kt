@@ -5,13 +5,13 @@ import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.notebook.data.Note
 import com.example.notebook.startup.LifecycleAnchor
 import com.example.notebook.startup.StartupOptimizer
 import com.example.notebook.ui.NoteEditScreen
@@ -47,17 +47,31 @@ class MainActivity : ComponentActivity() {
                 val viewModel: NoteViewModel = viewModel()
                 // 使用分页数据
                 val pagedNotes = viewModel.pagedNotes.collectAsLazyPagingItems()
-                var currentNote by remember { mutableStateOf<Note?>(null) }
+                var currentNoteId by remember { mutableStateOf<Long?>(null) }
                 var isEditing by remember { mutableStateOf(false) }
                 var isNewNote by remember { mutableStateOf(false) }
 
+                // AI 可用状态
+                val isAiAvailable by viewModel.isAiAvailable.collectAsState()
+                val summaryErrors by viewModel.summaryErrors.collectAsState()
+
+                // 观察当前笔记的实时变化（用于摘要状态更新）
+                val observedNote by remember(currentNoteId) {
+                    currentNoteId?.let { viewModel.observeNoteById(it) }
+                        ?: kotlinx.coroutines.flow.flowOf(null)
+                }.collectAsState(initial = null)
+
+                val currentSummaryError = observedNote?.id?.let { summaryErrors[it] }
+
                 if (isEditing) {
                     NoteEditScreen(
-                        note = if (isNewNote) null else currentNote,
+                        note = if (isNewNote) null else observedNote,
+                        isAiAvailable = isAiAvailable,
+                        summaryErrorType = currentSummaryError,
                         onBackClick = {
                             isEditing = false
                             isNewNote = false
-                            currentNote = null
+                            currentNoteId = null
                         },
                         onSaveClick = { note ->
                             if (isNewNote) {
@@ -67,19 +81,22 @@ class MainActivity : ComponentActivity() {
                             }
                             isEditing = false
                             isNewNote = false
-                            currentNote = null
+                            currentNoteId = null
+                        },
+                        onRefreshSummary = { note ->
+                            viewModel.regenerateSummary(note)
                         }
                     )
                 } else {
                     NoteListScreen(
                         pagedNotes = pagedNotes,
                         onNoteClick = { note ->
-                            currentNote = note
+                            currentNoteId = note.id
                             isEditing = true
                             isNewNote = false
                         },
                         onAddClick = {
-                            currentNote = null
+                            currentNoteId = null
                             isEditing = true
                             isNewNote = true
                         },

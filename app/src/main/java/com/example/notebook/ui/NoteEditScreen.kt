@@ -29,19 +29,26 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.notebook.R
+import com.example.notebook.ai.SummaryErrorType
 import com.example.notebook.data.Note
+import com.example.notebook.data.SummaryStatus
+import com.example.notebook.ui.components.SummaryCard
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
     note: Note?,
+    isAiAvailable: Boolean?,
+    summaryErrorType: SummaryErrorType?,
     onBackClick: () -> Unit,
-    onSaveClick: (Note) -> Unit
+    onSaveClick: (Note) -> Unit,
+    onRefreshSummary: (Note) -> Unit = {}
 ) {
-    var title by remember { mutableStateOf(note?.title ?: "") }
-    var content by remember { mutableStateOf(note?.content ?: "") }
-    var imagePaths by remember { mutableStateOf(note?.imagePaths ?: emptyList()) }
+    // Key editable state by note id so data arriving after first composition can populate fields.
+    var title by remember(note?.id) { mutableStateOf(note?.title ?: "") }
+    var content by remember(note?.id) { mutableStateOf(note?.content ?: "") }
+    var imagePaths by remember(note?.id) { mutableStateOf(note?.imagePaths ?: emptyList()) }
     var hasChanges by remember { mutableStateOf(false) }
     var showImagePreview by remember { mutableStateOf(false) }
     var previewImageIndex by remember { mutableIntStateOf(0) }
@@ -220,6 +227,18 @@ fun NoteEditScreen(
                     .heightIn(min = 200.dp),
                 minLines = 10
             )
+
+            // AI 摘要卡片（仅在编辑已有笔记时显示）
+            if (note != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                SummaryCard(
+                    summary = note.summary,
+                    status = note.summaryStatus,
+                    isAiAvailable = isAiAvailable,
+                    errorType = summaryErrorType,
+                    onRefreshClick = { onRefreshSummary(note) }
+                )
+            }
         }
     }
 }

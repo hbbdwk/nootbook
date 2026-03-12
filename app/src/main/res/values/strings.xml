@@ -28,4 +28,18 @@
     <!-- Image Preview Dialog -->
     <string name="image_preview">Image Preview</string>
     <string name="close">Close</string>
+
+    <!-- AI Summary -->
+    <string name="ai_summary">AI Summary</string>
+    <string name="refresh_summary">Refresh Summary</string>
+    <string name="summary_pending">Waiting for summary generation…</string>
+    <string name="summary_generating">Generating summary…</string>
+    <string name="summary_generating_short">Generating…</string>
+    <string name="summary_failed">Failed to generate summary, tap to retry</string>
+    <string name="summary_unavailable">Local AI model not loaded. Please deploy model file to enable summary.</string>
+    <string name="summary_unavailable_model_missing">Model file is missing. Please deploy the local model and try again.</string>
+    <string name="summary_unavailable_init_failed">Model initialization failed. Please restart app or retry.</string>
+    <string name="summary_failed_model_missing">Model file is missing. Tap to retry after model deployment.</string>
+    <string name="summary_failed_init">Model initialization failed. Tap to retry.</string>
+    <string name="summary_failed_inference">Local model inference failed. Tap to retry.</string>
 </resources>

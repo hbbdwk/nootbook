@@ -28,4 +28,18 @@
     <!-- Image Preview Dialog -->
     <string name="image_preview">大图预览</string>
     <string name="close">关闭</string>
+
+    <!-- AI Summary -->
+    <string name="ai_summary">AI 摘要</string>
+    <string name="refresh_summary">刷新摘要</string>
+    <string name="summary_pending">等待生成摘要…</string>
+    <string name="summary_generating">正在生成摘要…</string>
+    <string name="summary_generating_short">生成中…</string>
+    <string name="summary_failed">生成摘要失败，点击重试</string>
+    <string name="summary_unavailable">本地AI模型未加载，请先部署模型文件以启用摘要功能</string>
+    <string name="summary_unavailable_model_missing">模型文件缺失，请先部署本地模型后再试</string>
+    <string name="summary_unavailable_init_failed">模型初始化失败，请重启应用或稍后重试</string>
+    <string name="summary_failed_model_missing">模型文件缺失，请部署模型后点击重试</string>
+    <string name="summary_failed_init">模型初始化失败，点击重试</string>
+    <string name="summary_failed_inference">本地模型推理失败，点击重试</string>
 </resources>

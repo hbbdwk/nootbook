@@ -26,6 +26,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.notebook.R
 import com.example.notebook.data.Note
+import com.example.notebook.ui.components.SummaryPreview
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -245,13 +246,25 @@ fun NoteItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = note.content.ifEmpty { stringResource(R.string.no_content) },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+
+                    // 显示摘要预览（如果有）
+                    SummaryPreview(
+                        summary = note.summary,
+                        status = note.summaryStatus,
+                        modifier = Modifier.fillMaxWidth()
                     )
+
+                    // 如果没有摘要，显示内容预览
+                    if (note.summary.isNullOrBlank() && note.summaryStatus != com.example.notebook.data.SummaryStatus.GENERATING) {
+                        Text(
+                            text = note.content.ifEmpty { stringResource(R.string.no_content) },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = formatTimestamp(note.timestamp),

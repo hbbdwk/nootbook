@@ -12,4 +12,18 @@ class Converters {
     fun toStringList(value: String?): List<String>? {
         return value?.split("|||")?.filter { it.isNotEmpty() }
     }
+
+    @TypeConverter
+    fun fromSummaryStatus(status: SummaryStatus): String {
+        return status.name
+    }
+
+    @TypeConverter
+    fun toSummaryStatus(value: String): SummaryStatus {
+        return try {
+            SummaryStatus.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            SummaryStatus.PENDING
+        }
+    }
 }
