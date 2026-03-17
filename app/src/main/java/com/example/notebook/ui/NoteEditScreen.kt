@@ -6,9 +6,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,7 +28,6 @@ import coil.request.ImageRequest
 import com.example.notebook.R
 import com.example.notebook.ai.SummaryErrorType
 import com.example.notebook.data.Note
-import com.example.notebook.data.SummaryStatus
 import com.example.notebook.ui.components.SummaryCard
 import java.io.File
 
@@ -147,53 +143,70 @@ fun NoteEditScreen(
 
             // 图片网格预览区域
             if (imagePaths.isNotEmpty()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(((imagePaths.size + 2) / 3 * 100).dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                val columns = 3
+                val rows = imagePaths.chunked(columns)
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    itemsIndexed(imagePaths) { index, path ->
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(8.dp))
+                    rows.forEachIndexed { rowIndex, row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data(File(path))
-                                    .size(300)
-                                    .build(),
-                                contentDescription = stringResource(R.string.note_image),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable {
-                                        previewImageIndex = index
-                                        showImagePreview = true
-                                    },
-                                contentScale = ContentScale.Crop
-                            )
-                            IconButton(
-                                onClick = {
-                                    // 删除图片文件
-                                    File(path).delete()
-                                    imagePaths = imagePaths.filterIndexed { i, _ -> i != index }
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .size(24.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                                        RoundedCornerShape(12.dp)
+                            row.forEachIndexed { colIndex, path ->
+                                val index = rowIndex * columns + colIndex
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(File(path))
+                                            .size(300)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.note_image),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clickable {
+                                                previewImageIndex = index
+                                                showImagePreview = true
+                                            },
+                                        contentScale = ContentScale.Fit
                                     )
-                            ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.delete_image),
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(16.dp)
+                                    IconButton(
+                                        onClick = {
+                                            // 删除图片文件
+                                            File(path).delete()
+                                            imagePaths = imagePaths.filterIndexed { i, _ -> i != index }
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(24.dp)
+                                            .background(
+                                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.delete_image),
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            repeat(columns - row.size) {
+                                Spacer(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
                                 )
                             }
                         }
