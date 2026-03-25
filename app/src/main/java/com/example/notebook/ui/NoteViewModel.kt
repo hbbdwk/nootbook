@@ -10,6 +10,7 @@ import com.example.notebook.ai.SummaryManager
 import com.example.notebook.data.AppDatabase
 import com.example.notebook.data.Note
 import com.example.notebook.data.NoteRepository
+import com.example.notebook.data.drawing.DrawingSerializer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -73,16 +74,34 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateNote(note: Note) = viewModelScope.launch {
+        // 清理被替换的旧手绘文件
+        val oldNote = repository.getNoteById(note.id)
+        if (oldNote != null) {
+            if (oldNote.drawingPath != null && oldNote.drawingPath != note.drawingPath) {
+                DrawingSerializer.deleteFile(oldNote.drawingPath)
+            }
+            if (oldNote.drawingThumbnailPath != null && oldNote.drawingThumbnailPath != note.drawingThumbnailPath) {
+                DrawingSerializer.deleteFile(oldNote.drawingThumbnailPath)
+            }
+        }
         repository.updateNote(note)
         // 更新后重新生成摘要
         summaryManager.generateSummaryForNote(note.id, note.title, note.content)
     }
 
     fun deleteNote(note: Note) = viewModelScope.launch {
+        // 删除关联的手绘文件
+        DrawingSerializer.deleteFile(note.drawingPath)
+        DrawingSerializer.deleteFile(note.drawingThumbnailPath)
         repository.deleteNote(note)
     }
 
     fun deleteNoteById(id: Long) = viewModelScope.launch {
+        val note = repository.getNoteById(id)
+        if (note != null) {
+            DrawingSerializer.deleteFile(note.drawingPath)
+            DrawingSerializer.deleteFile(note.drawingThumbnailPath)
+        }
         repository.deleteNoteById(id)
     }
 

@@ -42,4 +42,15 @@
     <string name="summary_failed_model_missing">模型文件缺失，请部署模型后点击重试</string>
     <string name="summary_failed_init">模型初始化失败，点击重试</string>
     <string name="summary_failed_inference">本地模型推理失败，点击重试</string>
+
+    <!-- Drawing -->
+    <string name="drawing_title">手绘</string>
+    <string name="drawing_label">手绘笔记</string>
+    <string name="drawing_add">添加手绘</string>
+    <string name="drawing_edit">编辑手绘</string>
+    <string name="drawing_open">查看手绘</string>
+    <string name="drawing_pen">画笔</string>
+    <string name="drawing_eraser">橡皮擦</string>
+    <string name="drawing_undo">撤销</string>
+    <string name="drawing_redo">重做</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,9 +38,11 @@ fun NoteEditScreen(
     note: Note?,
     isAiAvailable: Boolean?,
     summaryErrorType: SummaryErrorType?,
+    drawingThumbnailPath: String?,
     onBackClick: () -> Unit,
     onSaveClick: (Note) -> Unit,
-    onRefreshSummary: (Note) -> Unit = {}
+    onRefreshSummary: (Note) -> Unit = {},
+    onDrawingClick: () -> Unit = {}
 ) {
     // Key editable state by note id so data arriving after first composition can populate fields.
     var title by remember(note?.id) { mutableStateOf(note?.title ?: "") }
@@ -113,7 +116,7 @@ fun NoteEditScreen(
                             }
                             onSaveClick(newNote)
                         },
-                        enabled = title.isNotEmpty() || content.isNotEmpty() || imagePaths.isNotEmpty()
+                        enabled = title.isNotEmpty() || content.isNotEmpty() || imagePaths.isNotEmpty() || drawingThumbnailPath != null
                     ) {
                         Icon(Icons.Default.Check, contentDescription = stringResource(R.string.save))
                     }
@@ -214,6 +217,55 @@ fun NoteEditScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            // ============= 手绘区域 =============
+            if (drawingThumbnailPath != null && File(drawingThumbnailPath).exists()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onDrawingClick() },
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.drawing_label),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(File(drawingThumbnailPath))
+                                .size(512)
+                                .build(),
+                            contentDescription = stringResource(R.string.drawing_open),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // 手绘按钮
+            OutlinedButton(
+                onClick = onDrawingClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Create, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    if (drawingThumbnailPath != null && File(drawingThumbnailPath).exists())
+                        stringResource(R.string.drawing_edit)
+                    else stringResource(R.string.drawing_add)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // 添加图片按钮
             OutlinedButton(

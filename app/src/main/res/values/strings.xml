@@ -42,4 +42,15 @@
     <string name="summary_failed_model_missing">Model file is missing. Tap to retry after model deployment.</string>
     <string name="summary_failed_init">Model initialization failed. Tap to retry.</string>
     <string name="summary_failed_inference">Local model inference failed. Tap to retry.</string>
+
+    <!-- Drawing -->
+    <string name="drawing_title">Drawing</string>
+    <string name="drawing_label">Hand Drawing</string>
+    <string name="drawing_add">Add Drawing</string>
+    <string name="drawing_edit">Edit Drawing</string>
+    <string name="drawing_open">View Drawing</string>
+    <string name="drawing_pen">Pen</string>
+    <string name="drawing_eraser">Eraser</string>
+    <string name="drawing_undo">Undo</string>
+    <string name="drawing_redo">Redo</string>
 </resources>

@@ -17,6 +17,7 @@ import com.example.notebook.startup.StartupOptimizer
 import com.example.notebook.ui.NoteEditScreen
 import com.example.notebook.ui.NoteListScreen
 import com.example.notebook.ui.NoteViewModel
+import com.example.notebook.ui.drawing.DrawingScreen
 import com.example.notebook.ui.theme.NotebookTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,6 +51,11 @@ class MainActivity : ComponentActivity() {
                 var currentNoteId by remember { mutableStateOf<Long?>(null) }
                 var isEditing by remember { mutableStateOf(false) }
                 var isNewNote by remember { mutableStateOf(false) }
+                var isDrawing by remember { mutableStateOf(false) }
+
+                // 手绘临时状态（编辑会话内）
+                var editDrawingPath by remember { mutableStateOf<String?>(null) }
+                var editDrawingThumbnailPath by remember { mutableStateOf<String?>(null) }
 
                 // AI 可用状态
                 val isAiAvailable by viewModel.isAiAvailable.collectAsState()
@@ -63,47 +69,77 @@ class MainActivity : ComponentActivity() {
 
                 val currentSummaryError = observedNote?.id?.let { summaryErrors[it] }
 
-                if (isEditing) {
-                    NoteEditScreen(
-                        note = if (isNewNote) null else observedNote,
-                        isAiAvailable = isAiAvailable,
-                        summaryErrorType = currentSummaryError,
-                        onBackClick = {
-                            isEditing = false
-                            isNewNote = false
-                            currentNoteId = null
-                        },
-                        onSaveClick = { note ->
-                            if (isNewNote) {
-                                viewModel.insertNote(note)
-                            } else {
-                                viewModel.updateNote(note)
+                when {
+                    isDrawing -> {
+                        DrawingScreen(
+                            existingDrawingPath = editDrawingPath,
+                            onSave = { drawPath, thumbPath ->
+                                editDrawingPath = drawPath
+                                editDrawingThumbnailPath = thumbPath
+                                isDrawing = false
+                            },
+                            onBack = { isDrawing = false }
+                        )
+                    }
+                    isEditing -> {
+                        NoteEditScreen(
+                            note = if (isNewNote) null else observedNote,
+                            isAiAvailable = isAiAvailable,
+                            summaryErrorType = currentSummaryError,
+                            drawingThumbnailPath = editDrawingThumbnailPath,
+                            onBackClick = {
+                                isEditing = false
+                                isNewNote = false
+                                currentNoteId = null
+                                editDrawingPath = null
+                                editDrawingThumbnailPath = null
+                            },
+                            onSaveClick = { note ->
+                                val noteWithDrawing = note.copy(
+                                    drawingPath = editDrawingPath ?: note.drawingPath,
+                                    drawingThumbnailPath = editDrawingThumbnailPath ?: note.drawingThumbnailPath
+                                )
+                                if (isNewNote) {
+                                    viewModel.insertNote(noteWithDrawing)
+                                } else {
+                                    viewModel.updateNote(noteWithDrawing)
+                                }
+                                isEditing = false
+                                isNewNote = false
+                                currentNoteId = null
+                                editDrawingPath = null
+                                editDrawingThumbnailPath = null
+                            },
+                            onRefreshSummary = { note ->
+                                viewModel.regenerateSummary(note)
+                            },
+                            onDrawingClick = {
+                                isDrawing = true
                             }
-                            isEditing = false
-                            isNewNote = false
-                            currentNoteId = null
-                        },
-                        onRefreshSummary = { note ->
-                            viewModel.regenerateSummary(note)
-                        }
-                    )
-                } else {
-                    NoteListScreen(
-                        pagedNotes = pagedNotes,
-                        onNoteClick = { note ->
-                            currentNoteId = note.id
-                            isEditing = true
-                            isNewNote = false
-                        },
-                        onAddClick = {
-                            currentNoteId = null
-                            isEditing = true
-                            isNewNote = true
-                        },
-                        onDeleteClick = { note ->
-                            viewModel.deleteNote(note)
-                        }
-                    )
+                        )
+                    }
+                    else -> {
+                        NoteListScreen(
+                            pagedNotes = pagedNotes,
+                            onNoteClick = { note ->
+                                currentNoteId = note.id
+                                editDrawingPath = note.drawingPath
+                                editDrawingThumbnailPath = note.drawingThumbnailPath
+                                isEditing = true
+                                isNewNote = false
+                            },
+                            onAddClick = {
+                                currentNoteId = null
+                                editDrawingPath = null
+                                editDrawingThumbnailPath = null
+                                isEditing = true
+                                isNewNote = true
+                            },
+                            onDeleteClick = { note ->
+                                viewModel.deleteNote(note)
+                            }
+                        )
+                    }
                 }
             }
         }

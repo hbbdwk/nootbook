@@ -153,6 +153,10 @@ fun NoteItem(
     // 过滤出存在的图片
     val validImagePaths = note.imagePaths.filter { File(it).exists() }
 
+    // 手绘缩略图
+    val hasDrawing = note.drawingThumbnailPath != null
+            && File(note.drawingThumbnailPath).exists()
+
     // 图片预览对话框（支持多图）
     if (showImagePreview && validImagePaths.isNotEmpty()) {
         ImagePreviewDialog(
@@ -173,6 +177,24 @@ fun NoteItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // 手绘缩略图
+            if (hasDrawing) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(File(note.drawingThumbnailPath!!))
+                        .size(512)
+                        .build(),
+                    contentDescription = "Drawing",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 120.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             // 多图预览（最多显示3张）
             if (validImagePaths.isNotEmpty()) {
                 val displayImages = validImagePaths.take(3)

@@ -22,5 +22,7 @@ data class Note(
     val imagePaths: List<String> = emptyList(),  // 多图片路径
     val summary: String? = null,                  // AI 生成的摘要
     val summaryStatus: SummaryStatus = SummaryStatus.PENDING,  // 摘要状态
+    val drawingPath: String? = null,              // 手绘数据 JSON 文件路径
+    val drawingThumbnailPath: String? = null,     // 手绘缩略图 PNG 路径
     val timestamp: Long = System.currentTimeMillis()
 )
